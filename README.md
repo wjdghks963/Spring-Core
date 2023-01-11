@@ -165,3 +165,65 @@ Spring에 의해 Impl은 인터페이스에 의존하게 만들었다.
 
 AppConfig와 같이 객체를 생성해주고 관리하며 의존관계를 연결해 주는 것을 IOC or DI Container라고 한다.
 
+<br>
+<br>
+
+# Spring  
+
+Spring Annotation을 이용해서 해당하는 클래스가 어떤 역할을 하는지 알게 해주고 그것을 역할에 맞게 사용한다.
+
+**Process**
+
+1. Spring Container 생성
+2. Spring Bean 등록
+3. Spring Bean 의존관계 설정 준비, 완료 => 동적인 의존관계를 설정해준다.
+
+
+## Bean
+
+Bean을 등록할때 `@Bean`을 사용하며 이 Bean의 key(name)는 기본값은 Appconfig에서 메서드의 이름으로 등록된다.
+이 이름은 같은 값이 존재하면 절대 안된다. 
+
+name 설정 방법 : `@Bean(name="name")`
+
+스프링 컨테이너에 올려져 있는 Bean을 찾기 위해서는 `applicationContext.getBean()` 메서드를 사용한다.
+
+### 상속
+
+스프링 빈에서 부모 타입으로 조회하면 자식 타입도 함께 조회한다.
+따라서 모든 자바 객체의 최고 부모인 `Object`타입으로 조회하면 모든 스프링 빈을 조회하게된다.
+
+### BeanDefinition
+
+BeanDefinition 인터페이스를 사용해 스프링에서 Bean은 역할과 구현을 개념적으로 나눈다.
+
+`AnnotationConfigApplicationContext`에서 인자로 받은 AppConfig에 있는 Bean들의 정보를 컨테이너에 올려놓는다.
+
+
+## Spring Container
+
+`ApplicationContext`를 스프링 컨테이너라고 한다.
+스프링 컨테이너는 `@Configuration`이 붙은 AppConfig를 설정 정보로 사용한다.
+
+AppConfig에 있는 Bean으로 등록된 메서드를 모두 호출해 반환된 객체를 스프링 컨테이너에 등록한다.
+이제 스프링 컨테이너에 들어간 객체를 스프링 빈이라 한다.
+
+컨테이너 생성
+
+안에 인자는 사용하고자 하는 Bean들이 등록되어 있는 AppCofig.class를 넣어줘야한다.
+
+```java
+ApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
+```
+
+
+### ApplicationContext
+
+스프링 컨테이너의 최상위 인터페이스 Bean Factory로부터 기능을 상속받아 제공한다.
+
+Bean Factory와 차이점
+1. 메지시 소스를 활용한 국제화 기능
+2. 환경변수
+3. 애플리케이션 이벤트
+4. 편리한 리소스 조회
+
