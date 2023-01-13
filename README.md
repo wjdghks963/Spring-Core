@@ -353,3 +353,139 @@ class ComponentFilterAppConfig{
 AppConfig 파일(@Configuration)에서 수동으로 빈을 등록할 때 이름이 자동으로 등록되는 경우다.
 이때 우선권은 수동으로 등록한 이름이 가져간다. => 수동 빈이 자동 빈을 오버라이딩한다.
 
+<br>
+<br>
+<hr>
+
+# 의존 관계 주입
+
+의존 관계를 주입할 때 4가지 방법이 존재한다.
+
+요즘 트렌드에서 권장되는 방법은 생성자 주입이다.
+
+## ⭐️ 생성자 주입
+**생성자(constructor)로 관계를 주입 받는 방법**
+
+**특징**
+- 생성자 호출시 1번만 호출되는 것을 보장할 수 있다.
+- 불변, 필수 의존관계에 사용한다.
+- 만약 생성자가 1개만 존재한다면 `@Autowired`를 사용하지 않아도 자동적으로 적용된다.
+
+```java
+@Component
+class A {
+    private B b;
+    // @Autowired 넣지 않아도 자동 적용
+    public A(B b){
+        this.b = b;
+    }
+}
+
+class B{
+    public B(){}
+}
+```
+
+### 불변
+
+대부분의 의존 관계 주입은 한번 일어나면 Application이 종료되기 전까지 변경할 일이 없다.
+오히려 불변해야한다.
+
+생성자 주입은 객체를 생성할 때 딱 1번만 호출되므로 이후에 호출되는 일이 없다. 
+
+### 누락
+
+스프링에 의해 나중에 다른 곳에서 사용할 일이 없지만 만약 순수 자바를 이용해 테스트를 한다면 생성자로 구현하지 않을 경우 의존성 주입이 되지 않는다.
+이때 누락이 발생해 컴파일 오류를 발생시킬 수 있다.
+
+하지만 생성자로 구현한다면 테스트할 객체를 순수 자바로 생성해서 테스트가 가능하다.
+
+#### final
+
+생성자 주입을 사용하면 필드에 final 키워드(이 변수는 수정할 수 없다는 의미)를 사용할 수 있다. 
+=> 생성자에서 혹시라도 값이 설정되지 않는 오류를 컴파일 시점에 막아준다.
+
+```java
+class A {
+    private final B b;
+    public A(B b){
+        // 만약 이 줄이 없다면 컴파일 오류를 반환한다.
+        this.b = b;
+    }
+}
+```
+
+
+## 수정자 주입
+**수정자(setter)메서드를 이용해 관계를 주입 받는 방법**
+
+**특징**
+- 선택, 변경 가능성이 있는 의존 관계에 사용한다.
+- [자바빈 프로퍼티 규약](https://m.blog.naver.com/PostView.naver?isHttpsRedirect=true&blogId=rbamtori&logNo=220760147541)의 수정자 메서드를 사용한다.
+- 수정자는 public으로 열어둬야한다.
+
+```java
+@Component
+class A {
+    private B b;
+    
+    @Autowired
+    public void setB(B b){
+        this.b = b;
+    }
+}
+
+class B{
+    public B(){}
+}
+```
+
+
+## 필드 주입
+**필드(filed)에 주입 받는 방법**
+
+**특징**
+- 외부에서 변경 불가능하다.
+- DI 프레임워크가 없다면 사용 불가하다.
+- 사용 ❌
+
+## 일반 메서드 주입
+**일반 메서드로 관계를 주입 받는 방법**
+
+**특징**
+- 한번에 여러 필드 주입 받을 수 있다.
+- 일반적으로 사용 ❌
+
+
+<br>
+
+# 롬복
+
+**[롬복이란?](https://dololak.tistory.com/783)**
+
+반복되는 getter, setter, toString 등의 메서드 작성 코드를 줄여주는 자바의 코드 다이어트 라이브러리
+
+여러가지 어노테이션을 제공하고 이를 기반으로 코드를 컴파일과정에서 생성해 주는 방식으로 동작하는 라이브러리
+=> 자바 코드로는 어노테이션만 붙이면 되지만 빌드 과정에서 생성된 바이트 코드(.class)에서는 코드가 다 작성된 상태가 된다.
+
+```java
+@Getter
+@Setter
+public class HelloLombok {
+    
+    private String name;
+    private int age;
+
+    public static void main(String[] args) {
+        HelloLombok helloLombok = new HelloLombok();
+        // 어노테이션으로 안에 getter setter가 존재하지 않아도 만들어짐 
+        helloLombok.setName("lomlom");
+        
+        String name = helloLombok.getName();
+        System.out.println("name = " + name);
+    }
+}
+```
+
+`RequiredArgsConstructor` 를 사용하게 된다면 클래스 내에 있는 final 필드를 모아 생성자를 자동으로 만들어 주기 때문에 생성자 코드를 생략해도 된다.
+
