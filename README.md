@@ -272,3 +272,84 @@ ex) SR(singleton 객체)을 A가 참조해서 공유 필드를 1로 바꿈 B가 
 
 이것은 Annotation으로 Appconfing가 `@Configuration`이 붙었을때 작동하며 만약 Appconfig에 붙어있지 않는다면 싱글톤이 깨진다.
 
+
+<br>
+<hr>
+
+# Component Scan
+
+기존에 AppConfig에서 설정했던 Bean들은 수가 많아지면 관리가 어렵다.
+
+따라서 스프링은 설정 정보가 없어도 자동으로 스프링 빈을 등록하는 컴포넌트 스캔이라는 기능을 제공한다.
+**컴포넌트 스캔은 `@Component`가 붙어있는 클래스들을 스캔한 후 빈으로 등록한다.**
+
+컴포넌트 스캔을 사용하기 위해선 `@ComponentScan`을 설정 정보에 붙여줘야한다.
+
+filter를 통해 해당하는 어노테이션이 붙은 클래스를 스캔에서 제외가 가능하다. => 빈으로 자동 등록 안함
+ 
+<br>
+
+**이름**
+
+`@Component`로 자동적으로 등록되는 빈의 이름 기본값은 소문자로 이루어진 클래스 이름이다.
+
+만약 빈의 이름을 바꾸고 싶다면 `@Component("name")`을 사용해 변경이 가능하다.
+
+<br>
+
+**의존관계 자동 주입**
+
+클래스가 의존하는 생성자에 `@Autowired`를 사용하면 스프링 컨테이너가 자동으로 스프링 빈을 찾아서 주입해 준다.
+
+기존 조회 전략은 타입이 같은 빈을 찾아서 주입한다. => `ac.getBean(className)`
+
+<br>
+
+## 기본 대상
+
+스캔하는 대상은 `@Component`뿐만 아니라 Component를 기반으로 한 Annotation도 스캔한다.
+
+- `@Controller` : MVC controller
+- `@Service` : 비지니스 로직
+- `@Repository` : 데이터 접근 계층
+- `@Configuration` : 설정 정보
+
+<br>
+
+## Filter 
+
+컴포넌트 스캔에서 제외, 추가할 대상을 지정할 수 있다.
+
+ComponentScan 내에서 include, exclude를 통해 스프링 컨테이너에 올라갈 빈을 등록하도록 혹은 등록하지 못하도록 만들 수 있다.
+
+
+Custom Annotation 제작한 후 filter하기
+
+```java
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface MyExcludeComponent {}
+
+@Configuration
+@ComponentScan(excludeFilters = @Filter(type = FilterType.ANNOTATION, classes = MyExcludeComponent.class))
+class ComponentFilterAppConfig{
+}
+```
+
+<br>
+
+## 중복 등록과 충돌
+
+컴포넌트 스캔할때 중복 등록에 의한 충돌이 날 가능성이 있다.
+
+**1. 자동 vs 자동**\
+스프링의 어노테이션을 이용해 자동으로 컨테이너에 빈을 등록할 경우 중복으로 등록되어 충돌이 날 수 있다.
+이 경우는 중복되는 빈의 이름 때문에 생기는 경우다. 
+
+**2. 수동 vs 자동**\
+수동적으로 컨테이너에 빈을 등록할 때 자동으로 빈을 등록할 때도 빈의 이름이 동일할 경우 충돌이 날 수 있다.
+
+AppConfig 파일(@Configuration)에서 수동으로 빈을 등록할 때 이름이 자동으로 등록되는 경우다.
+이때 우선권은 수동으로 등록한 이름이 가져간다. => 수동 빈이 자동 빈을 오버라이딩한다.
+
