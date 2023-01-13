@@ -353,6 +353,103 @@ class ComponentFilterAppConfig{
 AppConfig 파일(@Configuration)에서 수동으로 빈을 등록할 때 이름이 자동으로 등록되는 경우다.
 이때 우선권은 수동으로 등록한 이름이 가져간다. => 수동 빈이 자동 빈을 오버라이딩한다.
 
+#### 조회 대상 빈이 2개 이상일 때
+
+이게 무슨 소리냐 왜 싱글톤인 이름이 유니크한 빈이 조회가 두 개 이상이 될까\
+1. 생성자에서 상위 인터페이스를 기준으로 인자를 받게 되고
+2. 하지만 상위 인터페이스로 구현한 객체가 빈으로 등록된 객체가 2개 이상이다.
+3. 이러면 구현체 중에서 어떤 객체를 가져와야 할지 모른다.
+
+ex) 
+```java
+interface Car {
+    void run()
+    void setSpeed()
+}
+
+@Component
+class Kia implements Car { }
+
+@Component
+class H implements Car{ }
+
+@Component
+class shop {
+    private Car car;
+    // KIA or H 중에서 어떤 빈을 가져와야하는지 모름 => 에러
+    Shop(Car car){
+        this.car = car;
+    }
+}
+```
+
+
+
+**`@Autowired` 필드명 매칭**\
+1. 타입 매칭
+2. 타입 매칭 결과가 2개 이상일 떄 필드명 파라미터명으로 빈 이름 매칭
+
+```java
+@Component
+class Shop {
+    private Car car;
+    // 자동적으로 kia 빈을 가져온다.
+    Shop(Car kia){
+        this.car = kia;
+    }
+}
+```
+
+**`@Quilfier` -> `@Quilfier`끼리 매칭 -> 빈 이름 매칭**\
+추가 구분자를 붙여주는 방법\
+주입시 추가적인 방법을 제공하는 것이다. => 빈 이름을 변경하지 않는다.
+
+```java
+interface Car {
+    void run()
+    void setSpeed()
+}
+
+@Component
+@Quilfier("kia")
+class Kia implements Car { }
+
+@Component
+@Quilfier("h")
+class H implements Car{ }
+
+@Component
+class Shop {
+    private Car car;
+    Shop(@Qualifier("kia") Car car){
+        this.car = car;
+    }
+}
+```
+
+
+**`@Primary` 사용**\
+우선 순위를 정하는 방법\
+
+```java
+@Component
+@Primary
+class Kia implements Car { }
+
+@Component
+class H implements Car{ }
+
+@Component
+class Shop {
+    private Car car;
+    // Kia가 우선권을 가진다.
+    Shop(Car car){
+        this.car = car;
+    }
+}
+```
+
+
 <br>
 <br>
 <hr>
