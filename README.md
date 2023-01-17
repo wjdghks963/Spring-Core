@@ -586,3 +586,73 @@ public class HelloLombok {
 
 `RequiredArgsConstructor` 를 사용하게 된다면 클래스 내에 있는 final 필드를 모아 생성자를 자동으로 만들어 주기 때문에 생성자 코드를 생략해도 된다.
 
+
+<br>
+<br>
+
+<hr>
+
+# Bean 생명주기
+
+Bean = 객체 생성 -> 의존관계 주입
+
+DB와 connect, disconnect 같은 행위를 할때 Spring Container가 생성될 때나 죽을때나 Bean은 생사를 같이 한다.  
+
+빈의 생성자는 필수 정보(파라미터)를 받고, 메모리를 할당해서 객체를 생성하지만 초기화는 생성된 값들을 활용해서 외부 커넥션을 연결하는 등 무거운 동작을 수행한다.
+
+따라서 생성자에서 간단한 것이 아니라면 초기화를 하는 것은 좋지 않기 때문에 동작을 분리해서 코드를 작성하는 것이 좋다.
+
+
+## InitializingBean, DisposableBean
+
+Interface를 implement하면서 생명상태에 대해 메서드를 작동 시킬 수 있게된다.
+
+**InitializingBean**\
+생성될 때 초기화하는 메서드 사용 
+```java
+ @Override
+public void afterPropertiesSet() throws Exception {
+    // Bean이 생성된 후 초기화를 하는 곳    
+}
+```
+
+**DisposableBean**\
+소멸될 때 메서드 사용
+```java
+ @Override
+public void destory(){
+    // Bean이 죽을 때 사용됨
+        }
+```
+
+사용하기 간단하고 생명 주기에 꼭 맞는 메서드 같아 보이지만 단점들이 존재한다.
+1. 외부 라이브러리 불가
+2. 오버 라이딩이기 때문에 이름 변경 불가
+
+
+## Bean에서 사용
+
+```java
+  @Bean(initMethod = "초기화 메서드", destroyMethod = "죽을 때 메서드")
+```
+
+1. 이제 메서드 이름 마음대로 가능
+2. 외부 라이브러리 사용 가능
+3. destroyMehod 같은 경우 defualt 값으로 클래스 내에 shutdown, close가 있을 경우 땡겨서 데려와 사용한다.
+
+## Annotaion 사용
+
+최신 스프링에서 권장되는 방법은 어노테이션을 사용하는 방법이다.
+
+생성 = @PostConstruct\
+죽음 = @PreDestroy
+
+매우 사용하기 쉽지만 외부 라이브러리는 적용하지 못한다는 단점이 있다.\
+만약 외부 라이브러리를 사용하고 싶다면 위의 Bean에서 제공하는 기능을 사용하는 것이 좋다.
+
+
+<br>
+<br>
+
+<hr>
+
