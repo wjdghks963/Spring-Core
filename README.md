@@ -656,3 +656,30 @@ public void destory(){
 
 <hr>
 
+# Bean의 스코프
+
+### 싱글톤 스코프
+빈의 기본적인 스코프는 싱글톤 스코프다.\
+따라서 스프링 컨테이너가 생성되고 종료될때까지 유지된다.
+
+### 프로토타입 스코프
+스프링 컨테이너가 항상 새로운 인스턴스를 생성해 반환한다. => 생성, DI, 초기화까지만 관여한다.
+
+
+### ObjectFactory, ObjectProvider
+Spring에 의존적인 DL 서비스를 제공해주는 class
+
+ObjectFactory : 지정한 빈을 컨테이너에서 대신 찾아주는 DL 서비스를 제공\
+ObjectProvider : ObjectFactory에 더해 편의 기능을 제공해준다.
+
+### 웹 스코프
+
+웹 환경에서만 동작하며 프로토 타입과 다르게 싱글톤 스코프와 같이 스프링이 해당 스코프의 종료시점까지 관리하기 때문에 종료 메서드를 호출한다.
+
+**종류**
+
+`request` : HTTP 요청 하나가 처리될때까지 유지되는 스코프 각 요청마다 별도의 인스턴스가 생성되고 관리된다.\
+`session` : HTTP session과 동일한 생명주기\
+`application`  : 서블릿 컨텍스트( ServletContext )와 동일한 생명주기\
+`websocket` : 웹 소켓과 동일한 생명주기
+
